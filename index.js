@@ -3,11 +3,14 @@ const morgan = require('morgan');
 const { Prohairesis } = require('prohairesis');
 const bodyParser = require('body-parser');
 
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 8081;
 
-const mySQLString = 'mysql://bb85759ef4840a:863ef4ec@us-cdbr-east-05.cleardb.net/heroku_28c2b9b4021c247?reconnect=true';
+const mySQLString = process.env.CLEARDB_DATABASE_URL;
 const database = new Prohairesis(mySQLString);
 
 
@@ -18,6 +21,25 @@ app
     .use(bodyParser.urlencoded({extended: false }))
     .use(bodyParser.json())
     
+    .get('/', async (req, res) => {
+        const users = await database.query(`
+        SELECT
+            *
+        FROM
+            User
+        ORDER BY
+            date_added DESC
+    `);
+
+        res.contentType('html');
+
+        res.end(`
+        ${users.map((user) => {
+            return `<p>${user.name} ${user.city} ${user.role} ${user.idea}</p>`;
+        }).join('')}
+    `);
+    })
+
     .post('/api/user',  async (req, res) => {
         const body = req.body;
         await database.execute(`
