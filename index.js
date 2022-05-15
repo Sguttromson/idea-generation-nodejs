@@ -1,3 +1,4 @@
+//imports
 const express = require('express');
 const morgan = require('morgan');
 const { Prohairesis } = require('prohairesis');
@@ -7,13 +8,15 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+
 const app = express();
+
 const port = process.env.PORT || 8081;
 
 const mySQLString = process.env.CLEARDB_DATABASE_URL;
 const database = new Prohairesis(mySQLString);
 
-
+//express rest api
 app
     .use(morgan('dev'))
     .use(express.static('public'))
@@ -39,6 +42,7 @@ app
         }).join('')}
     `);
     })
+
 
     .post('/api/user',  async (req, res) => {
         const body = req.body;
